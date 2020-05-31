@@ -1,0 +1,11 @@
+function: global
+		FIXED POINT SOLUTION
+block: 0
+in: 
+out: 
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    output 42
+

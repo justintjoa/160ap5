@@ -210,6 +210,7 @@ class BasicBlock {
         predecessors_(pred) {}
 
   const std::vector<Instruction>& instructions() const { return instructions_; }
+  void addstatement(int index, Instruction input);
   const std::set<int>& getSuccessors() { return successors_; }
   const std::set<int>& getPredecessors() { return predecessors_; }
   void insertPredecessor(int pred) { predecessors_.insert(pred); }

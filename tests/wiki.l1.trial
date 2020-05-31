@@ -1,0 +1,26 @@
+function: global
+		FIXED POINT SOLUTION
+block: 0
+in: 0 0 0 0 
+out: 1  1  1  1  
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    b <- 1
+    c <- 3
+    e <- 7
+    _tmp1 <- b MUL c
+    _opt0 <- _tmp1
+    _tmp0 <- _tmp1 ADD g
+    _opt1 <- _tmp0
+    a <- _tmp0
+    _tmp3 <- b MUL c
+    _opt0 <- _tmp3
+    _tmp2 <- e MUL _tmp3
+    _opt2 <- _tmp2
+    d <- _tmp2
+    _tmp4 <- a ADD d
+    _opt3 <- _tmp4
+    output _tmp4
+

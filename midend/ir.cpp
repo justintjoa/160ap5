@@ -607,16 +607,39 @@ void CFG::runWorklist(
   // fill me in
 }
 
+Instruction makeinstr(int index, Instruction parent) {
+  std::string var = "_opt" + std::to_string(index);
+  Instruction a(Operand(var, OperandType::Var), parent.getOperand0());
+  return a;
+}
+
+
+void BasicBlock::addstatement(int index, Instruction input) {
+  instructions_.insert(instructions_.begin() + index,input);
+}
+
 std::vector<BasicBlock> CFG::computeGCSE(
     const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&
         genkill) {
-          std::cout << "I'm in!" << std::endl;
+          std::cout << "I'm in now!" << std::endl;
           optimized_program = basic_blocks;
-          for (int i = 0; i < optimized_program.size(); i++) {
-            for (int j = 0; j < optimized_program.at(i).instructions().size(); j++) {
-              std::cout << optimized_program.at(i).instructions().at(j).getOperand1().toString() << std::endl;
-              std::cout << optimized_program.at(i).instructions().at(j).getOperand2().toString() << std::endl;
-              std::cout << "went ok" << std::endl;
+          int index = 0;
+          for (int i = 0; i < basic_blocks.size(); i++) {
+            for (int j = 0; j < basic_blocks.at(i).instructions().size(); j++) {
+              std::string compare = "";
+              if (basic_blocks.at(i).instructions().at(j).isUnary() || basic_blocks.at(i).instructions().at(j).isBinary()) {
+                compare = compare + basic_blocks.at(i).instructions().at(j).getOperand1().toString();
+              }
+              compare = compare + " " + OpcodeToString(basic_blocks.at(i).instructions().at(j).getOpcode());
+              if (basic_blocks.at(i).instructions().at(j).isBinary()) {
+                compare = compare + " " + basic_blocks.at(i).instructions().at(j).getOperand2().toString();
+              }
+              if (legend.find(compare) != legend.end()) {
+                index++;
+                Instruction a = makeinstr(legend.find(compare)->second,basic_blocks.at(i).instructions().at(j));
+                optimized_program.at(i).addstatement(index,a);
+              }
+              index++;
             }
           }
           return optimized_program;

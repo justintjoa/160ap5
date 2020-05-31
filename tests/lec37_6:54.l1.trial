@@ -1,0 +1,37 @@
+function: bar
+		FIXED POINT SOLUTION
+block: 0
+in: 0 0 0 
+out: 1  1  1  
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    _tmp2 <- a SUB 12
+    _opt0 <- _tmp2
+    _tmp1 <- _tmp2 MUL 42
+    _opt1 <- _tmp1
+    _tmp0 <- a ADD _tmp1
+    _opt2 <- _tmp0
+    return _tmp0
+
+function: foo
+		FIXED POINT SOLUTION
+block: 0
+in: 0 0 
+out: 1  1  
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    arg a
+    x <- CALL bar
+    _tmp3 <- a ADD 1
+    _opt0 <- _tmp3
+    arg _tmp3
+    y <- CALL bar
+    _tmp4 <- x MUL y
+    _opt1 <- _tmp4
+    return _tmp4
+
+function: global
