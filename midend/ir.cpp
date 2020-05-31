@@ -546,19 +546,66 @@ void CFG::getAllExpressions() {
   allExprs = E;
 }
 
+
+
+std::vector<bool> intersect(std::vector<bool> a, std::vector<bool> b) {
+  if (a.size() != b.size()) {
+    std::cout << "vectors not same size" << std::endl;
+    return;
+  }
+  std::vector<bool> output;
+  for (int i = 0; i < a.size(); i++) {
+    bool out = a.at(i) & b.at(i);
+    output.push_back(out);
+  }
+  return output;
+}
+
+std::vector<bool> unionop(std::vector<bool> a, std::vector<bool> b) {
+  if (a.size() != b.size()) {
+    std::cout << "vectors not same size" << std::endl;
+    return;
+  }
+  std::vector<bool> output;
+  for (int i = 0; i < a.size(); i++) {
+    bool out = a.at(i) | b.at(i);
+    output.push_back(out);
+  }
+  return output;
+}
+
+std::vector<bool> subtract(std::vector<bool> a, std::vector<bool> b) {
+  if (a.size() != b.size()) {
+    std::cout << "vectors not same size" << std::endl;
+    return;
+  }
+  for (int i = 0; i < a.size(); i++) {
+    if(a.at(i) & b.at(i)) {
+      a.at(i) = false;
+    }
+  }
+  return a;
+}
+
+
+
+
+
+
 // writes to availableExpressions
 void CFG::runWorklist(
     const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&
         genkill) {
-          for (int i = 0; i < genkill.size(); i++) {
-            std::cout << "First" << std::endl;
-            for (int j = 0; j < genkill.at(i).first.size(); j++) {
-              std::cout << genkill.at(i).first.at(j) << std::endl;
+          for (int i = 0; i < availableExpressions.size(); i++) {
+            std::set<int> pre = basic_blocks.at(i).getPredecessors();
+            std::set<int>::iterator it;
+            for (it = pre.begin(); it != pre.end(); ++it) {
+                int f = *it; // Note the "*" here
+                availableExpressions.at(i).first = intersect(availableExpressions.at(i).first,availableExpressions.at(f).second);
             }
-            std::cout << "Second" << std::endl;
-            for (int j = 0; j < genkill.at(i).second.size(); j++) {
-              std::cout << genkill.at(i).second.at(j) << std::endl;
-            }
+            auto temp = subtract(availableExpressions.at(i).first,genkill.at(i).second);
+            temp = unionop(temp,genkill.at(i).first);
+            availableExpressions.at(i).second = temp;
           }
   // fill me in
 }
@@ -566,13 +613,29 @@ void CFG::runWorklist(
 std::vector<BasicBlock> CFG::computeGCSE(
     const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&
         genkill) {
+          computeAvailExprs();
   // fill me in
+}
+
+
+void CFG::resetAvailExprs(const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>& genkill) {
+  //assume all vector sizes internally are same
+  int size = genkill.size();
+  availableExpressions = genkill;
+  std::fill(availableExpressions.at(0).first.begin(), availableExpressions.at(0).first.end(), false);
+  std::fill(availableExpressions.at(0).second.begin(), availableExpressions.at(0).second.end(), true);
+  for (int i = 1; i < size; i++) {
+    std::fill(availableExpressions.at(i).first.begin(), availableExpressions.at(i).first.end(), true);
+    std::fill(availableExpressions.at(i).second.begin(), availableExpressions.at(i).second.end(), true);
+  }
 }
 
 void CFG::computeAvailExprs() {
   getAllExpressions();
   auto genkill = getAllGenKill();
+  resetAvailExprs(genkill);
   runWorklist(genkill);
 }
 
 }  // namespace cs160::midend
+ 

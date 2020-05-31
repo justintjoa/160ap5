@@ -227,6 +227,7 @@ class CFG {
   CFG(std::vector<BasicBlock> b) : basic_blocks(b) {}
 
   void getAllExpressions();
+  void resetAvailExprs(const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&);
   std::pair<std::vector<bool>, std::vector<bool>> computeGenKill(
       BasicBlock block);
   std::vector<std::pair<std::vector<bool>, std::vector<bool>>> getAllGenKill();
