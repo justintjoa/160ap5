@@ -1,0 +1,10 @@
+x:=foo();
+while(x<10){
+  x:=x+1;
+  if(x<=y) {
+    while(x<y) {
+      y := y - 2;
+      }
+    }
+  }
+  output y;

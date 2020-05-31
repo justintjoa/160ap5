@@ -1,0 +1,57 @@
+function: foo
+		FIXED POINT SOLUTION
+block: 0
+in: 0 0 0 0 
+out: 1  1  0  0  
+
+block: 1
+in: 1 0 0 0 
+out: 1  0  1  0  
+
+block: 2
+in: 1 0 1 0 
+out: 1  0  1  0  
+
+block: 3
+in: 1 0 1 0 
+out: 1  0  1  0  
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    _tmp0 <- a ADD b
+    _opt2 <- _tmp0
+    x <- _tmp0
+    _tmp1 <- a MUL b
+    _opt3 <- _tmp1
+    y <- _tmp1
+ block 1:
+    WHILE_START_0:
+    _tmp3 <- _opt2
+    _opt2 <- _tmp3
+    _tmp2 <- _tmp3 LT y
+    _opt0 <- _tmp2
+    jump_if_0 _tmp2 WHILE_END_0:
+ block 2:
+    _tmp4 <- a ADD 1
+    _opt1 <- _tmp4
+    a <- _tmp4
+    _tmp5 <- a ADD b
+    _opt2 <- _tmp5
+    x <- _tmp5
+    jump WHILE_START_0:
+ block 3:
+    WHILE_END_0:
+    return x
+
+function: global
+		FIXED POINT SOLUTION
+block: 0
+in: 
+out: 
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    output 10
+

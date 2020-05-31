@@ -1,0 +1,15 @@
+int a;
+int b;
+int c;
+int d;
+int e;
+int g; // just some fluff before the actual example
+b := 1;
+c := 3;
+e := 7; // the wikipedia example
+a := b * c + g;
+b:=2;
+if(0<3){
+  d := e * b * c;
+  }
+output a + d;

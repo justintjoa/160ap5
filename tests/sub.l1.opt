@@ -1,0 +1,13 @@
+function: global
+		FIXED POINT SOLUTION
+block: 0
+in: 0 
+out: 1  
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    _tmp0 <- 3 SUB 42
+    _opt0 <- _tmp0
+    output _tmp0
+

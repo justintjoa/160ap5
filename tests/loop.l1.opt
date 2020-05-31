@@ -1,0 +1,40 @@
+function: global
+		FIXED POINT SOLUTION
+block: 0
+in: 0 0 0 
+out: 0  0  0  
+
+block: 1
+in: 0 0 0 
+out: 1  0  0  
+
+block: 2
+in: 1 0 0 
+out: 0  0  0  
+
+block: 3
+in: 1 0 0 
+out: 1  0  0  
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    n <- 100
+    result <- 0
+ block 1:
+    WHILE_START_0:
+    _tmp0 <- 0 LT n
+    _opt0 <- _tmp0
+    jump_if_0 _tmp0 WHILE_END_0:
+ block 2:
+    _tmp1 <- result ADD n
+    _opt2 <- _tmp1
+    result <- _tmp1
+    _tmp2 <- n SUB 1
+    _opt1 <- _tmp2
+    n <- _tmp2
+    jump WHILE_START_0:
+ block 3:
+    WHILE_END_0:
+    output result
+

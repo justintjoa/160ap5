@@ -1,0 +1,10 @@
+def foo(int a, int b): int{
+int x;
+int y;
+x:=a+b;
+y:=a*b;
+while(a+bb<y) {
+a:=a+1;
+x:=a+b;}
+return x;}
+output 10; 

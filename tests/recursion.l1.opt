@@ -1,0 +1,53 @@
+function: fact
+		FIXED POINT SOLUTION
+block: 0
+in: 0 0 0 
+out: 1  0  0  
+
+block: 1
+in: 1 0 0 
+out: 1  0  0  
+
+block: 2
+in: 1 0 0 
+out: 1  1  1  
+
+block: 3
+in: 1 0 0 
+out: 1  0  0  
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    _tmp0 <- x EQ 0
+    _opt0 <- _tmp0
+    jump_if_0 _tmp0 IF_FALSE_0:
+ block 1:
+    result <- 1
+    jump IF_END_0:
+ block 2:
+    IF_FALSE_0:
+    _tmp1 <- x SUB 1
+    _opt2 <- _tmp1
+    arg _tmp1
+    factXMinus1 <- CALL fact
+    _tmp2 <- x MUL factXMinus1
+    _opt1 <- _tmp2
+    result <- _tmp2
+ block 3:
+    IF_END_0:
+    return result
+
+function: global
+		FIXED POINT SOLUTION
+block: 0
+in: 
+out: 
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    arg 5
+    fact5 <- CALL fact
+    output fact5
+

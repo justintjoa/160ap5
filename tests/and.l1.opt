@@ -1,0 +1,39 @@
+function: global
+		FIXED POINT SOLUTION
+block: 0
+in: 0 0 0 
+out: 1  1  1  
+
+block: 1
+in: 1 1 1 
+out: 1  1  1  
+
+block: 2
+in: 1 1 1 
+out: 1  1  1  
+
+block: 3
+in: 1 1 1 
+out: 1  1  1  
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    x <- 3
+    _tmp1 <- 3 EQ 4
+    _opt0 <- _tmp1
+    _tmp2 <- 4 LT 32
+    _opt1 <- _tmp2
+    _tmp0 <- _tmp1 AND _tmp2
+    _opt2 <- _tmp0
+    jump_if_0 _tmp0 IF_FALSE_0:
+ block 1:
+    x <- 1
+    jump IF_END_0:
+ block 2:
+    IF_FALSE_0:
+    x <- 0
+ block 3:
+    IF_END_0:
+    output x
+

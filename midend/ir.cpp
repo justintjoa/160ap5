@@ -1,0 +1,578 @@
+#include <assert.h>
+
+#include <algorithm>
+#include <iostream>
+#include <optional>
+#include <set>
+#include <sstream>
+#include <string>
+#include <vector>
+
+#include "midend/ir.h"
+
+namespace cs160::midend {
+
+bool sdiff(bool b1, bool b2) {
+  if (b1 == true && b2 == false) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool sinter(bool b1, bool b2) {
+  if (b1 == true && b2 == true) {
+    return true;
+  } else {
+    return false;
+  }
+}
+
+bool sunion(bool b1, bool b2) {
+  if (b1 == false && b2 == false) {
+    return false;
+  } else {
+    return true;
+  }
+}
+
+std::vector<std::string> split(const std::string& s, char delim) {
+  std::stringstream ss(s);
+  std::string item;
+  std::vector<std::string> elems;
+  while (std::getline(ss, item, delim)) {
+    elems.push_back(item);  // std::move ?
+  }
+  return elems;
+}
+
+const std::string OpcodeToString(Opcode op_) {
+  switch (op_) {
+    case Opcode::NOT:
+      return "!";
+    case Opcode::AND:
+      return "AND";
+    case Opcode::OR:
+      return "OR";
+    case Opcode::CALL:
+      return "CALL";
+    case Opcode::jump_unconditional:
+      return "jump";
+    case Opcode::jump_conditional:
+      return "jump_if_0";
+    case Opcode::arg:
+      return "arg";
+    case Opcode::ret:
+      return "return";
+    case Opcode::output:
+      return "output";
+    case Opcode::ADD:
+      return "ADD";
+    case Opcode::SUB:
+      return "SUB";
+    case Opcode::MUL:
+      return "MUL";
+    case Opcode::LT:
+      return "LT";
+    case Opcode::LE:
+      return "LE";
+    case Opcode::EQ:
+      return "EQ";
+    default:
+      return "unknown or uninitialized opcode type";
+  }
+}
+
+const std::string IRSymbolTable::tmpPrefix = "_tmp";
+
+IR::TmpVar::TmpVar(const std::string& name, IR& ir) : name(name), ir(ir) {}
+IR::TmpVar::~TmpVar() {}
+
+IR::TmpVar IR::freshTmp() {
+  auto name = IRSymbolTable::tmpPrefix + std::to_string(symbolTable.nextTmp++);
+  return TmpVar(name, *this);
+}
+
+std::vector<Instruction> IR::generateCFG(const Program& program) {
+  insns.clear();
+  nextIndex = 0;
+  symbolTable = {};
+
+  VisitProgramExpr(program);
+  return insns;
+}
+
+void IR::VisitIntegerExpr(const IntegerExpr& exp) {
+  arg_stack.push_back(Operand(exp.value()));
+}
+
+void IR::VisitVariableExpr(const VariableExpr& exp) {
+  arg_stack.push_back(Operand(exp.name(), OperandType::Var));
+}
+
+void IR::VisitAddExpr(const AddExpr& exp) {
+  auto tmpVar = freshTmp();
+  exp.lhs().Visit(this);
+  exp.rhs().Visit(this);
+
+  auto rhs1 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+  auto rhs2 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+
+  arg_stack.push_back(Operand(tmpVar.getName(), OperandType::Var));
+  insns.push_back(Instruction(Operand(tmpVar.getName(), OperandType::Var),
+                              Opcode::ADD, rhs2, rhs1));
+}
+
+void IR::VisitSubtractExpr(const SubtractExpr& exp) {
+  auto tmpVar = freshTmp();
+  exp.lhs().Visit(this);
+  exp.rhs().Visit(this);
+
+  auto rhs1 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+  auto rhs2 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+
+  arg_stack.push_back(Operand(tmpVar.getName(), OperandType::Var));
+  insns.push_back(Instruction(Operand(tmpVar.getName(), OperandType::Var),
+                              Opcode::SUB, rhs2, rhs1));
+}
+
+void IR::VisitMultiplyExpr(const MultiplyExpr& exp) {
+  auto tmpVar = freshTmp();
+  exp.lhs().Visit(this);
+  exp.rhs().Visit(this);
+
+  auto rhs1 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+  auto rhs2 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+
+  arg_stack.push_back(Operand(tmpVar.getName(), OperandType::Var));
+  insns.push_back(Instruction(Operand(tmpVar.getName(), OperandType::Var),
+                              Opcode::MUL, rhs2, rhs1));
+}
+
+void IR::VisitLessThanExpr(const LessThanExpr& exp) {
+  auto tmpVar = freshTmp();
+  exp.lhs().Visit(this);
+  exp.rhs().Visit(this);
+
+  auto rhs1 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+  auto rhs2 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+
+  arg_stack.push_back(Operand(tmpVar.getName(), OperandType::Var));
+  insns.push_back(Instruction(Operand(tmpVar.getName(), OperandType::Var),
+                              Opcode::LT, rhs2, rhs1));
+}
+
+void IR::VisitLessThanEqualToExpr(const LessThanEqualToExpr& exp) {
+  auto tmpVar = freshTmp();
+  exp.lhs().Visit(this);
+  exp.rhs().Visit(this);
+
+  auto rhs1 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+  auto rhs2 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+
+  arg_stack.push_back(Operand(tmpVar.getName(), OperandType::Var));
+  insns.push_back(Instruction(Operand(tmpVar.getName(), OperandType::Var),
+                              Opcode::LE, rhs2, rhs1));
+}
+
+void IR::VisitEqualToExpr(const EqualToExpr& exp) {
+  auto tmpVar = freshTmp();
+  exp.lhs().Visit(this);
+  exp.rhs().Visit(this);
+
+  auto rhs1 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+  auto rhs2 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+
+  arg_stack.push_back(Operand(tmpVar.getName(), OperandType::Var));
+  insns.push_back(Instruction(Operand(tmpVar.getName(), OperandType::Var),
+                              Opcode::EQ, rhs2, rhs1));
+}
+
+void IR::VisitLogicalAndExpr(const LogicalAndExpr& exp) {
+  auto tmpVar = freshTmp();
+  exp.lhs().Visit(this);
+  exp.rhs().Visit(this);
+
+  auto rhs1 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+  auto rhs2 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+
+  arg_stack.push_back(Operand(tmpVar.getName(), OperandType::Var));
+  insns.push_back(Instruction(Operand(tmpVar.getName(), OperandType::Var),
+                              Opcode::AND, rhs2, rhs1));
+}
+
+void IR::VisitLogicalOrExpr(const LogicalOrExpr& exp) {
+  auto tmpVar = freshTmp();
+  exp.lhs().Visit(this);
+  exp.rhs().Visit(this);
+
+  auto rhs1 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+  auto rhs2 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+
+  arg_stack.push_back(Operand(tmpVar.getName(), OperandType::Var));
+  insns.push_back(Instruction(Operand(tmpVar.getName(), OperandType::Var),
+                              Opcode::OR, rhs2, rhs1));
+}
+
+void IR::VisitLogicalNotExpr(const LogicalNotExpr& exp) {
+  auto tmpVar = freshTmp();
+  exp.operand().Visit(this);
+
+  auto rhs1 = std::move(arg_stack.back());
+  arg_stack.pop_back();
+
+  arg_stack.push_back(Operand(tmpVar.getName(), OperandType::Var));
+  insns.push_back(Instruction(Operand(tmpVar.getName(), OperandType::Var),
+                              Opcode::NOT, rhs1));
+}
+
+void IR::VisitIntTypeExpr(const IntType& exp) {}
+
+void IR::VisitBlockExpr(
+    const BlockExpr& exp) {  // Insert declared variables to symbol table and
+                             // initialize them to 0
+  for (auto& d : exp.decls()) {
+    d->Visit(this);
+  }
+
+  // Generate code for the statements, note that this may create additional
+  // temporaries
+  for (auto& s : exp.stmts()) {
+    s->Visit(this);
+  }
+}
+
+void IR::VisitDeclarationExpr(const Declaration& exp) {}
+
+void IR::VisitAssignmentExpr(const Assignment& assignment) {
+  assignment.rhs().Visit(this);
+  auto rhs = arg_stack.back();
+
+  if (rhs.GetOperandType() == OperandType::Function) {
+    insns.push_back(Instruction(
+        Operand(assignment.lhs().name(), OperandType::Var), Opcode::CALL, rhs));
+  } else {
+    insns.push_back(
+        Instruction(Operand(assignment.lhs().name(), OperandType::Var), rhs));
+  }
+  arg_stack.push_back(Operand(assignment.lhs().name(), OperandType::Var));
+}
+
+void IR::VisitConditionalExpr(const Conditional& conditional) {
+  auto n = std::to_string(freshIndex());
+  auto falseLabel = Operand("IF_FALSE_" + n, OperandType::Label);
+  auto endLabel = Operand("IF_END_" + n, OperandType::Label);
+
+  conditional.guard().Visit(this);
+  auto guard_expr = arg_stack.back();
+  arg_stack.pop_back();
+
+  insns.push_back(
+      Instruction(guard_expr, Opcode::jump_conditional, falseLabel));
+  conditional.true_branch().Visit(this);
+
+  insns.push_back(Instruction(Opcode::jump_unconditional, endLabel));
+  insns.push_back(falseLabel);
+
+  conditional.false_branch().Visit(this);
+  insns.push_back(endLabel);
+}
+
+void IR::VisitLoopExpr(const Loop& loop) {
+  auto n = std::to_string(freshIndex());
+  auto startLabel = Operand("WHILE_START_" + n, OperandType::Label);
+  auto endLabel = Operand("WHILE_END_" + n, OperandType::Label);
+
+  insns.push_back(startLabel);
+  loop.guard().Visit(this);
+
+  auto guard_expr = arg_stack.back();
+  arg_stack.pop_back();
+
+  insns.push_back(Instruction(guard_expr, Opcode::jump_conditional, endLabel));
+
+  loop.body().Visit(this);
+
+  insns.push_back(Instruction(Opcode::jump_unconditional, startLabel));
+  insns.push_back(endLabel);
+}
+
+void IR::VisitFunctionCallExpr(const FunctionCall& call) {
+  if (!(call.arguments().empty())) {
+    for (auto arg = call.arguments().begin(); arg != call.arguments().end();
+         ++arg) {
+      (*arg)->Visit(this);
+      auto tmp_arg = arg_stack.back();
+      arg_stack.pop_back();
+      insns.push_back(Instruction(Opcode::arg, tmp_arg));
+    }
+  }
+  arg_stack.push_back(Operand(call.callee_name(), OperandType::Function));
+}
+
+void IR::VisitFunctionDefExpr(const FunctionDef& def) {
+  def.function_body().Visit(this);
+  def.retval().Visit(this);
+  auto tmp_arg = arg_stack.back();
+  arg_stack.pop_back();
+  insns.push_back(Instruction(Opcode::ret, tmp_arg));
+}
+
+void IR::VisitProgramExpr(const Program& program) {
+  for (const auto& fnDef : program.function_defs()) {
+    fnDef->Visit(this);
+
+    auto bb = getBB(insns);
+    program_blocks[fnDef->function_name()] = bb;
+
+    insns.clear();
+    arg_stack.clear();
+  }
+
+  // remaining statements treated as one function def
+  insns.clear();
+  arg_stack.clear();
+
+  program.statements().Visit(this);
+  program.arithmetic_exp().Visit(this);
+
+  auto retval = arg_stack.back();
+  arg_stack.pop_back();
+
+  insns.push_back(Instruction(Opcode::output, retval));
+
+  auto bb = getBB(insns);
+  program_blocks["global"] = bb;
+}
+
+std::vector<int> IR::getLeaders(std::vector<Instruction> insns) {
+  std::vector<int> leaders;
+  assert(!(insns.empty()));
+  assert(leaders.empty());
+
+  leaders.push_back(0);
+
+  for (std::size_t i = 1; i < insns.size(); ++i) {
+    if (insns[i].isLabel()) {
+      if (leaders.back() != i) {  // label follows jump
+        leaders.push_back(i);
+      }
+    }
+    if (insns[i].getOpcode() == Opcode::jump_conditional ||
+        insns[i].getOpcode() == Opcode::jump_unconditional) {
+      if (leaders.back() != i) {  // jump follows label
+        leaders.push_back(i + 1);
+      }
+    }
+  }
+
+  return leaders;
+}
+
+std::vector<BasicBlock> IR::getBB(std::vector<Instruction> insns) {
+  std::vector<BasicBlock> basic_blocks;
+  auto leaders = getLeaders(insns);
+  for (auto it = leaders.begin(); it != leaders.end(); ++it) {
+    std::vector<Instruction> instr;
+    std::set<int> succ;
+    uint32_t beginning = *it;
+    uint32_t end;
+    if (std::next(it) != leaders.end()) {
+      end = (*std::next(it) - 1);
+    } else {
+      end = insns.size() - 1;
+    }
+    // one line long blocks
+    for (std::size_t i = beginning; i <= end; ++i) {
+      instr.push_back(insns[i]);
+    }
+
+    // // successor sets
+    // jumps
+    auto ins = insns[end];
+    if (ins.getOpcode() == Opcode::jump_unconditional ||
+        ins.getOpcode() == Opcode::jump_conditional) {
+      auto jump_edge = ins.getJumpTarget();
+
+      for (auto lit = leaders.begin(); lit != leaders.end(); ++lit) {
+        if (insns[*lit].getLabel() &&
+            insns[*lit].getLabel().value().toString() == jump_edge.toString()) {
+          auto leaders_idx = std::distance(leaders.begin(), lit);
+          succ.insert(leaders_idx);
+        }
+      }
+    }
+    // everything else
+    if (ins.getOpcode() != Opcode::jump_unconditional) {
+      if (std::next(it) != leaders.end()) {
+        auto leaders_idx = std::distance(leaders.begin(), std::next(it));
+        succ.insert(leaders_idx);
+      }
+    }
+    basic_blocks.push_back(BasicBlock(
+        instr, succ, *it));  // blockID is the number of the instruction
+                             // overall, just needs to be unique
+  }
+
+  // predecessors
+  for (auto b = basic_blocks.begin(); b != basic_blocks.end(); ++b) {
+    auto curr_idx = std::distance(basic_blocks.begin(), b);
+    auto curr_succ = b->getSuccessors();
+    for (auto s = curr_succ.begin(); s != curr_succ.end(); ++s) {
+      basic_blocks[*s].insertPredecessor(curr_idx);
+    }
+  }
+
+  return basic_blocks;
+}
+
+std::pair<std::vector<bool>, std::vector<bool>> CFG::computeGenKill(
+    BasicBlock block) {
+  std::vector<bool> gen(allExprs.size(), false);
+  std::vector<bool> kill(allExprs.size(), false);
+  auto instrs = block.instructions();
+
+  // gen
+  for (auto instr = instrs.cbegin(); instr != instrs.cend(); ++instr) {
+    if (instr->isBinary()) {
+      auto lhs = instr->getOperand0();
+      auto rhs1 = instr->getOperand1();
+      auto rhs2 = instr->getOperand2();
+
+      // no immediate conflict, try next instruction
+      if (lhs.toString() != rhs1.toString() ||
+          lhs.toString() != rhs2.toString()) {
+        auto next_instr = std::next(instr);
+        if (next_instr == instrs.cend()) {
+          // we made it to the end, we can relax
+          std::string s = instr->toString();
+          std::string delimiter = "<-";
+          auto pos = s.find(delimiter);
+          std::string expr;
+          if (pos != std::string::npos) {
+            expr = s.substr(pos + 3, s.length());
+            gen[legend[expr]] = true;
+          }
+        }
+
+        for (auto remainder = next_instr; remainder != instrs.cend();
+             ++remainder) {
+          auto nxt = (remainder->getOperand0()).toString();
+          if (nxt == rhs1.toString() || nxt == rhs1.toString()) {
+            break;
+          } else if (std::next(remainder) == instrs.cend()) {
+            // we made it to the end, we can relax
+            std::string s = instr->toString();
+            std::string delimiter = "<-";
+            auto pos = s.find(delimiter);
+            std::string expr;
+            if (pos != std::string::npos) {
+              expr = s.substr(pos + 3, s.length());
+              gen[legend[expr]] = true;
+            }
+          }
+        }
+      }
+    }
+  }
+
+  // kill
+  for (auto instr = instrs.cbegin(); instr != instrs.cend(); ++instr) {
+    if (instr->isUnary() || instr->isBinary() || instr->isSSA()) {
+      auto lhs = (instr->getOperand0()).toString();
+      for (auto l = legend.cbegin(); l != legend.cend(); ++l) {
+        if ((l->first).find(lhs) != std::string::npos) {
+          kill[l->second] = true;
+        }
+      }
+    }
+  }
+
+  return std::make_pair(gen, kill);
+}
+
+std::vector<std::pair<std::vector<bool>, std::vector<bool>>>
+CFG::getAllGenKill() {
+  std::vector<std::pair<std::vector<bool>, std::vector<bool>>> genkill;
+  for (auto block = basic_blocks.cbegin(); block != basic_blocks.cend();
+       ++block) {
+    auto genkill_pair = computeGenKill(*block);
+    genkill.push_back(genkill_pair);
+  }
+  return genkill;
+}
+
+void CFG::getAllExpressions() {
+  std::map<std::string, int> map_legend;
+  int ctr = 0;
+  for (auto block = basic_blocks.cbegin(); block != basic_blocks.cend();
+       ++block) {
+    for (auto instr = block->instructions().cbegin();
+         instr != block->instructions().cend(); ++instr) {
+      // we only care about binary expressions
+      if (instr->isBinary()) {
+        std::string s = instr->toString();
+        std::string delimiter = "<-";
+        auto pos = s.find(delimiter);
+        std::string expr;
+        if (pos != std::string::npos) {
+          expr = s.substr(pos + 3, s.length());
+          if (map_legend.find(expr) == map_legend.end()) {
+            map_legend[expr] = ctr;
+            ++ctr;
+          }
+        }
+      }
+    }
+  }
+  std::vector<bool> E(map_legend.size(), false);
+  legend = map_legend;
+  allExprs = E;
+}
+
+// writes to availableExpressions
+void CFG::runWorklist(
+    const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&
+        genkill) {
+          for (int i = 0; i < genkill.size(); i++) {
+            std::cout << "First" << std::endl;
+            for (int j = 0; j < genkill.at(i).first.size(); j++) {
+              std::cout << genkill.at(i).first.at(j) << std::endl;
+            }
+            std::cout << "Second" << std::endl;
+            for (int j = 0; j < genkill.at(i).second.size(); j++) {
+              std::cout << genkill.at(i).second.at(j) << std::endl;
+            }
+          }
+  // fill me in
+}
+
+std::vector<BasicBlock> CFG::computeGCSE(
+    const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&
+        genkill) {
+  // fill me in
+}
+
+void CFG::computeAvailExprs() {
+  getAllExpressions();
+  auto genkill = getAllGenKill();
+  runWorklist(genkill);
+}
+
+}  // namespace cs160::midend

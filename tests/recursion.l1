@@ -1,0 +1,17 @@
+def fact(int x): int {
+	int result;
+	if (x = 0) {
+		result := 1;
+	} else {
+		int factXMinus1;
+                factXMinus1 := fact(x - 1);
+		result := x * factXMinus1;
+	}
+	return result;
+}
+
+int fact5;
+fact5 := fact(5);
+
+output fact5;
+

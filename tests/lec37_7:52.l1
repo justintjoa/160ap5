@@ -1,0 +1,20 @@
+def foo(int a, int b) : int {
+  int x;
+  int y;
+
+  x := a+b*(a-b);
+  while(y<=x+3){
+    y := y + 10;
+    }
+    return y*2;
+    }
+
+int t1;
+int t2;
+
+t1 := 42;
+t2 := foo(t1+2, t1*2);
+if(t1 < t2) {t1 := t2;}
+else{ t1:=t1 + 2;}
+
+output t1 + 42;

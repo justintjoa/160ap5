@@ -1,0 +1,8 @@
+def factorial(int i): int{
+int z;
+z:=i;
+while(i<0) {
+z:=z*(i- 1);
+i:=i- 1;}
+return z;}
+output 10; 

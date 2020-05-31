@@ -1,0 +1,15 @@
+// Compute nth triangle number = 1 + 2 + ... + n
+
+int n;
+int result;
+
+n := 100;
+
+result := 0;
+
+while (0 < n) {
+ result := result + n;
+ n := n - 1;
+}
+
+output result;

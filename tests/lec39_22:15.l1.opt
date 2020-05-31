@@ -1,0 +1,82 @@
+function: foo
+		FIXED POINT SOLUTION
+block: 0
+in: 0 0 0 0 0 0 
+out: 0  0  0  0  0  0  
+
+block: 1
+in: 0 0 0 0 0 0 
+out: 1  0  0  0  0  0  
+
+block: 2
+in: 1 0 0 0 0 0 
+out: 1  1  1  0  0  0  
+
+block: 3
+in: 1 1 1 0 0 0 
+out: 0  0  1  0  0  0  
+
+block: 4
+in: 1 1 1 0 0 0 
+out: 0  0  1  0  0  0  
+
+block: 5
+in: 0 0 1 0 0 0 
+out: 0  0  1  0  0  0  
+
+block: 6
+in: 1 0 0 0 0 0 
+out: 1  0  0  0  0  0  
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    x <- 1
+    y <- a
+ block 1:
+    WHILE_START_0:
+    _tmp1 <- x EQ b
+    _opt1 <- _tmp1
+    _tmp0 <- ! _tmp1
+    jump_if_0 _tmp0 WHILE_END_0:
+ block 2:
+    _tmp2 <- x MUL 2
+    _opt2 <- _tmp2
+    z <- _tmp2
+    _tmp3 <- z LE b
+    _opt5 <- _tmp3
+    jump_if_0 _tmp3 IF_FALSE_1:
+ block 3:
+    _tmp4 <- y MUL y
+    _opt4 <- _tmp4
+    y <- _tmp4
+    _tmp5 <- _opt2
+    _opt2 <- _tmp5
+    x <- _tmp5
+    jump IF_END_1:
+ block 4:
+    IF_FALSE_1:
+    _tmp6 <- y MUL a
+    _opt3 <- _tmp6
+    y <- _tmp6
+    _tmp7 <- x ADD 1
+    _opt0 <- _tmp7
+    x <- _tmp7
+ block 5:
+    IF_END_1:
+    jump WHILE_START_0:
+ block 6:
+    WHILE_END_0:
+    return y
+
+function: global
+		FIXED POINT SOLUTION
+block: 0
+in: 
+out: 
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    output 4
+

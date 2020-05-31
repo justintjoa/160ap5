@@ -1,0 +1,14 @@
+def bar(int a) : int { return a + (a - 12) * 42; }
+
+def foo(int a) : int {
+  int x;
+  int y;
+  x:=bar(a);
+  y:=bar(a+1);
+  return x*y;
+  }
+
+int x;
+while(x<2) {x:=x+1;}
+x:=foo(x);
+output x+3;

@@ -1,0 +1,8 @@
+i := 0;
+i2 := i * 2;
+n := 10;
+sum := 0;while (i < n) {
+  i := i + 1; // this invalidates i * 2 for CSE, but not the out set
+  sum := sum + i * 2;
+}
+output 4;
