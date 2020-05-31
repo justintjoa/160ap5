@@ -551,7 +551,6 @@ void CFG::getAllExpressions() {
 std::vector<bool> intersect(std::vector<bool> a, std::vector<bool> b) {
   if (a.size() != b.size()) {
     std::cout << "vectors not same size" << std::endl;
-    return;
   }
   std::vector<bool> output;
   for (int i = 0; i < a.size(); i++) {
@@ -564,7 +563,6 @@ std::vector<bool> intersect(std::vector<bool> a, std::vector<bool> b) {
 std::vector<bool> unionop(std::vector<bool> a, std::vector<bool> b) {
   if (a.size() != b.size()) {
     std::cout << "vectors not same size" << std::endl;
-    return;
   }
   std::vector<bool> output;
   for (int i = 0; i < a.size(); i++) {
@@ -577,7 +575,6 @@ std::vector<bool> unionop(std::vector<bool> a, std::vector<bool> b) {
 std::vector<bool> subtract(std::vector<bool> a, std::vector<bool> b) {
   if (a.size() != b.size()) {
     std::cout << "vectors not same size" << std::endl;
-    return;
   }
   for (int i = 0; i < a.size(); i++) {
     if(a.at(i) & b.at(i)) {
@@ -613,7 +610,16 @@ void CFG::runWorklist(
 std::vector<BasicBlock> CFG::computeGCSE(
     const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&
         genkill) {
-          computeAvailExprs();
+          std::cout << "I'm in!" << std::endl;
+          optimized_program = basic_blocks;
+          for (int i = 0; i < optimized_program.size(); i++) {
+            for (int j = 0; j < optimized_program.at(i).instructions().size(); j++) {
+              std::cout << optimized_program.at(i).instructions().at(j).getOperand1().toString() << std::endl;
+              std::cout << optimized_program.at(i).instructions().at(j).getOperand2().toString() << std::endl;
+              std::cout << "went ok" << std::endl;
+            }
+          }
+          return optimized_program;
   // fill me in
 }
 
@@ -631,6 +637,7 @@ void CFG::resetAvailExprs(const std::vector<std::pair<std::vector<bool>, std::ve
 }
 
 void CFG::computeAvailExprs() {
+  std::cout << "I'm in 2" << std::endl;
   getAllExpressions();
   auto genkill = getAllGenKill();
   resetAvailExprs(genkill);
