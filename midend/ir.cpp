@@ -666,14 +666,8 @@ void CFG::optimize(int blocknumber, int index, int available) {
   if (availableExpressions.at(blocknumber).first.at(available) == false) {
     return;
   }
-  std::cout << "so good" << std::endl;
-  if (availableExpressions.at(blocknumber).second.at(available) == true) {
-    std::cout << "Am I dead yet" << std::endl;
-    std::cout << optimized_program.at(blocknumber).instructions().size() << std::endl;
-    std::cout << index << std::endl;
-    if (checkifkilled(blocknumber,index,optimized_program.at(blocknumber).instructions().at(index))) {
-      return;
-    }
+  if (checkifkilled(blocknumber,index,optimized_program.at(blocknumber).instructions().at(index))) {
+    return;
   }
   std::cout << "Trace" << std::endl;
   std::string var = "_opt" + std::to_string(index);
