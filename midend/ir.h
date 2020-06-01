@@ -237,12 +237,17 @@ class CFG {
 
 
   bool checkifkilled(int blocknumber, int index, Instruction available);
+
+  
+
   void runWorklist(
       const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&);
 
   void computeAvailExprs();
   std::vector<BasicBlock> computeGCSE(
       const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&);
+
+  void GCSEhelper(int blocknumber);
 
   void optimize(int blocknumber, int index, int available);
 

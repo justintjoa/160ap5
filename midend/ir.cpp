@@ -593,6 +593,7 @@ std::vector<bool> subtract(std::vector<bool> a, std::vector<bool> b) {
 void CFG::runWorklist(
     const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&
         genkill) {
+          int blocknumber = 0;
           for (int i = 0; i < availableExpressions.size(); i++) {
             std::set<int> pre = basic_blocks.at(i).getPredecessors();
             std::set<int>::iterator it;
@@ -661,37 +662,44 @@ void CFG::optimize(int blocknumber, int index, int available) {
 
 
 
+void CFG::GCSEhelper(int blocknumber) {
+  int index = 0;
+  std::cout << "begin outter loop" << std::endl;
+  for (int j = 0; j < basic_blocks.at(blocknumber).instructions().size(); j++) {
+    std::cout << "being inner" << std::endl;
+    std::string compare = "";
+    if (basic_blocks.at(blocknumber).instructions().at(j).isUnary() || basic_blocks.at(blocknumber).instructions().at(j).isBinary()) {
+      compare = compare + basic_blocks.at(blocknumber).instructions().at(j).getOperand1().toString();
+    }
+    compare = compare + " " + OpcodeToString(basic_blocks.at(blocknumber).instructions().at(j).getOpcode());
+    if (basic_blocks.at(blocknumber).instructions().at(j).isBinary()) {
+      compare = compare + " " + basic_blocks.at(blocknumber).instructions().at(j).getOperand2().toString();
+    }
+    if (legend.find(compare) != legend.end()) {
+      std::cout << "Before optimize" << std::endl;
+      optimize(blocknumber,index,legend.find(compare)->second);
+      std::cout << "go on" << std::endl;
+      index++;
+      Instruction a = makeinstr(legend.find(compare)->second,basic_blocks.at(blocknumber).instructions().at(j));
+      optimized_program.at(blocknumber).addstatement(index,a);
+      std::cout << "after optimize" << std::endl;
+    }
+    index++;
+    std::cout << "end inner" << std::endl;
+  }
+  std::cout << "end outter loop" << std::endl;
+}
+
+
+
+
 std::vector<BasicBlock> CFG::computeGCSE(
     const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&
         genkill) {
           std::cout << "I'm in now!" << std::endl;
           optimized_program = basic_blocks;
           for (int i = 0; i < basic_blocks.size(); i++) {
-            int index = 0;
-            std::cout << "begin outter loop" << std::endl;
-            for (int j = 0; j < basic_blocks.at(i).instructions().size(); j++) {
-              std::cout << "being inner" << std::endl;
-              std::string compare = "";
-              if (basic_blocks.at(i).instructions().at(j).isUnary() || basic_blocks.at(i).instructions().at(j).isBinary()) {
-                compare = compare + basic_blocks.at(i).instructions().at(j).getOperand1().toString();
-              }
-              compare = compare + " " + OpcodeToString(basic_blocks.at(i).instructions().at(j).getOpcode());
-              if (basic_blocks.at(i).instructions().at(j).isBinary()) {
-                compare = compare + " " + basic_blocks.at(i).instructions().at(j).getOperand2().toString();
-              }
-              if (legend.find(compare) != legend.end()) {
-                std::cout << "Before optimize" << std::endl;
-                optimize(i,index,legend.find(compare)->second);
-                std::cout << "go on" << std::endl;
-                index++;
-                Instruction a = makeinstr(legend.find(compare)->second,basic_blocks.at(i).instructions().at(j));
-                optimized_program.at(i).addstatement(index,a);
-                std::cout << "after optimize" << std::endl;
-              }
-              index++;
-              std::cout << "end inner" << std::endl;
-            }
-            std::cout << "end outter loop" << std::endl;
+              GCSEhelper(i);
           }
           return optimized_program;
   // fill me in
