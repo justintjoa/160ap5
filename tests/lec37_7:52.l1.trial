@@ -1,1 +1,92 @@
 function: foo
+		FIXED POINT SOLUTION
+block: 0
+in: 0 0 0 0 0 0 0 
+out: 1  1  1  0  0  0  0  
+
+block: 1
+in: 1 1 1 0 0 0 0 
+out: 1  1  1  1  1  0  0  
+
+block: 2
+in: 1 1 1 1 1 0 0 
+out: 1  1  1  1  0  0  0  
+
+block: 3
+in: 1 1 1 1 1 0 0 
+out: 1  1  1  1  1  0  1  
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    _tmp2 <- a SUB b
+    _opt0 <- _tmp2
+    _tmp1 <- b MUL _tmp2
+    _opt1 <- _tmp1
+    _tmp0 <- a ADD _tmp1
+    _opt2 <- _tmp0
+    x <- _tmp0
+ block 1:
+    WHILE_START_0:
+    _tmp4 <- x ADD 3
+    _opt3 <- _tmp4
+    _tmp3 <- y LE _tmp4
+    _opt4 <- _tmp3
+    jump_if_0 _tmp3 WHILE_END_0:
+ block 2:
+    _tmp5 <- y ADD 10
+    _opt5 <- _tmp5
+    y <- _tmp5
+    jump WHILE_START_0:
+ block 3:
+    WHILE_END_0:
+    _tmp6 <- y MUL 2
+    _opt6 <- _tmp6
+    return _tmp6
+
+function: global
+		FIXED POINT SOLUTION
+block: 0
+in: 0 0 0 0 
+out: 1  1  1  0  
+
+block: 1
+in: 1 1 1 0 
+out: 0  0  0  0  
+
+block: 2
+in: 1 1 1 0 
+out: 0  0  0  0  
+
+block: 3
+in: 0 0 0 0 
+out: 0  0  0  1  
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    t1 <- 42
+    _tmp7 <- t1 ADD 2
+    _opt0 <- _tmp7
+    arg _tmp7
+    _tmp8 <- t1 MUL 2
+    _opt1 <- _tmp8
+    arg _tmp8
+    t2 <- CALL foo
+    _tmp9 <- t1 LT t2
+    _opt2 <- _tmp9
+    jump_if_0 _tmp9 IF_FALSE_1:
+ block 1:
+    t1 <- t2
+    jump IF_END_1:
+ block 2:
+    IF_FALSE_1:
+    _tmp10 <- _opt1
+    _opt0 <- _tmp10
+    t1 <- _tmp10
+ block 3:
+    IF_END_1:
+    _tmp11 <- t1 ADD 42
+    _opt3 <- _tmp11
+    output _tmp11
+

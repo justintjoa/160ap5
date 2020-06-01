@@ -1,0 +1,1 @@
+build/c1 ./tests/ex1_orig.l1 ./tests/ex1_orig.l1.trial

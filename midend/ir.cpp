@@ -613,19 +613,64 @@ Instruction makeinstr(int index, Instruction parent) {
   return a;
 }
 
+void BasicBlock::setinstruction(int index, Instruction a) {
+  instructions_.at(index) = a;
+}
+
 
 void BasicBlock::addstatement(int index, Instruction input) {
   instructions_.insert(instructions_.begin() + index,input);
 }
+
+bool CFG::checkifkilled(int blocknumber, int index, Instruction available) {
+  std::cout << "Enter crazy" << std::endl;
+  for (int i = 0; i < index-1; i++) {
+    std::cout << "checking if i'm dead" << std::endl;
+    if (available.isUnary() || available.isBinary()) {
+      if (optimized_program.at(blocknumber).instructions().at(i).getOperand0().toString().compare(available.getOperand1().toString()) == 0) {
+        return true;
+      }
+    }
+    if (available.isBinary()) {
+      if (optimized_program.at(blocknumber).instructions().at(i).getOperand0().toString().compare(available.getOperand2().toString()) == 0) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+void CFG::optimize(int blocknumber, int index, int available) {
+  if (availableExpressions.at(blocknumber).first.at(available) == false) {
+    return;
+  }
+  std::cout << "so good" << std::endl;
+  if (availableExpressions.at(blocknumber).second.at(available) == true) {
+    std::cout << "Am I dead yet" << std::endl;
+    std::cout << optimized_program.at(blocknumber).instructions().size() << std::endl;
+    std::cout << index << std::endl;
+    if (checkifkilled(blocknumber,index,optimized_program.at(blocknumber).instructions().at(index))) {
+      return;
+    }
+  }
+  std::cout << "Trace" << std::endl;
+  std::string var = "_opt" + std::to_string(index);
+  Instruction a(optimized_program.at(blocknumber).instructions().at(index).getOperand0(),Operand(var, OperandType::Var));
+  optimized_program.at(blocknumber).setinstruction(index,a);
+}
+
+
 
 std::vector<BasicBlock> CFG::computeGCSE(
     const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&
         genkill) {
           std::cout << "I'm in now!" << std::endl;
           optimized_program = basic_blocks;
-          int index = 0;
           for (int i = 0; i < basic_blocks.size(); i++) {
+            int index = 0;
+            std::cout << "begin outter loop" << std::endl;
             for (int j = 0; j < basic_blocks.at(i).instructions().size(); j++) {
+              std::cout << "being inner" << std::endl;
               std::string compare = "";
               if (basic_blocks.at(i).instructions().at(j).isUnary() || basic_blocks.at(i).instructions().at(j).isBinary()) {
                 compare = compare + basic_blocks.at(i).instructions().at(j).getOperand1().toString();
@@ -635,12 +680,18 @@ std::vector<BasicBlock> CFG::computeGCSE(
                 compare = compare + " " + basic_blocks.at(i).instructions().at(j).getOperand2().toString();
               }
               if (legend.find(compare) != legend.end()) {
+                std::cout << "Before optimize" << std::endl;
+                optimize(i,index,legend.find(compare)->second);
+                std::cout << "go on" << std::endl;
                 index++;
                 Instruction a = makeinstr(legend.find(compare)->second,basic_blocks.at(i).instructions().at(j));
                 optimized_program.at(i).addstatement(index,a);
+                std::cout << "after optimize" << std::endl;
               }
               index++;
+              std::cout << "end inner" << std::endl;
             }
+            std::cout << "end outter loop" << std::endl;
           }
           return optimized_program;
   // fill me in

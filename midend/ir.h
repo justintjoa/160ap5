@@ -209,6 +209,7 @@ class BasicBlock {
         successors_(succ),
         predecessors_(pred) {}
 
+  void setinstruction(int index, Instruction a);
   const std::vector<Instruction>& instructions() const { return instructions_; }
   void addstatement(int index, Instruction input);
   const std::set<int>& getSuccessors() { return successors_; }
@@ -233,12 +234,19 @@ class CFG {
       BasicBlock block);
   std::vector<std::pair<std::vector<bool>, std::vector<bool>>> getAllGenKill();
 
+
+
+  bool checkifkilled(int blocknumber, int index, Instruction available);
   void runWorklist(
       const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&);
 
   void computeAvailExprs();
   std::vector<BasicBlock> computeGCSE(
       const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&);
+
+  void optimize(int blocknumber, int index, int available);
+
+  
 
   std::vector<std::pair<std::vector<bool>, std::vector<bool>>>
   getAvailableExpressions() {

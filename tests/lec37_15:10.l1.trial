@@ -1,1 +1,42 @@
 function: global
+		FIXED POINT SOLUTION
+block: 0
+in: 0 0 0 
+out: 1  0  0  
+
+block: 1
+in: 1 0 0 
+out: 0  0  0  
+
+block: 2
+in: 1 0 0 
+out: 0  0  0  
+
+block: 3
+in: 0 0 0 
+out: 0  1  1  
+
+
+		OPTIMIZED PROGRAM
+ block 0:
+    x <- CALL foo
+    _tmp0 <- x LT 10
+    _opt0 <- _tmp0
+    jump_if_0 _tmp0 IF_FALSE_0:
+ block 1:
+    x <- 3
+    y <- 2
+    jump IF_END_0:
+ block 2:
+    IF_FALSE_0:
+    x <- 2
+    y <- 3
+ block 3:
+    IF_END_0:
+    _tmp2 <- y MUL 2
+    _opt1 <- _tmp2
+    _tmp1 <- x ADD _tmp2
+    _opt2 <- _tmp1
+    z <- _tmp1
+    output z
+
