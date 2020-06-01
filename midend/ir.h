@@ -238,7 +238,7 @@ class CFG {
 
   bool checkifkilled(int blocknumber, int index, Instruction available);
 
-  
+  void runWorklisthelper(int blocknumber, const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&);
 
   void runWorklist(
       const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&);

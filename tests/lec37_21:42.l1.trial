@@ -13,24 +13,24 @@ in: 1 0 0 0 0
 out: 0  0  1  0  0  
 
 block: 3
-in: 0 0 1 0 0 
-out: 0  0  1  1  0  
+in: 0 0 0 0 0 
+out: 0  0  0  1  0  
 
 block: 4
-in: 0 0 1 1 0 
+in: 0 0 0 1 0 
 out: 0  0  0  0  0  
 
 block: 5
-in: 0 0 1 1 0 
-out: 0  0  1  1  0  
+in: 0 0 0 1 0 
+out: 0  0  0  1  0  
 
 block: 6
 in: 0 0 1 0 0 
 out: 0  0  1  0  0  
 
 block: 7
-in: 0 0 1 0 0 
-out: 0  0  1  0  0  
+in: 0 0 0 0 0 
+out: 0  0  0  0  0  
 
 block: 8
 in: 1 0 0 0 0 

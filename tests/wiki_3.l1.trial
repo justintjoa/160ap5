@@ -5,16 +5,16 @@ in: 0 0 0 0
 out: 1  0  0  0  
 
 block: 1
-in: 1 0 0 0 
-out: 1  1  0  0  
+in: 0 0 0 0 
+out: 0  1  0  0  
 
 block: 2
-in: 1 1 0 0 
+in: 0 1 0 0 
 out: 0  0  0  0  
 
 block: 3
-in: 1 1 0 0 
-out: 1  1  0  0  
+in: 0 1 0 0 
+out: 0  1  0  0  
 
 
 		OPTIMIZED PROGRAM
@@ -31,7 +31,7 @@ out: 1  1  0  0
     _opt1 <- _tmp1
     jump_if_0 _tmp1 WHILE_END_0:
  block 2:
-    _tmp3 <- _opt0
+    _tmp3 <- i MUL 2
     _opt0 <- _tmp3
     _tmp2 <- sum ADD _tmp3
     _opt2 <- _tmp2

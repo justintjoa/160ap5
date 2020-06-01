@@ -5,16 +5,16 @@ in: 0 0 0 0 0
 out: 1  1  0  0  0  
 
 block: 1
-in: 1 1 0 0 0 
-out: 1  1  1  1  0  
+in: 1 0 0 0 0 
+out: 1  0  1  1  0  
 
 block: 2
-in: 1 1 1 1 0 
+in: 1 0 1 1 0 
 out: 1  0  0  1  0  
 
 block: 3
-in: 1 1 1 1 0 
-out: 1  1  1  1  0  
+in: 1 0 1 1 0 
+out: 1  0  1  1  0  
 
 
 		OPTIMIZED PROGRAM

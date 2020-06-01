@@ -584,27 +584,48 @@ std::vector<bool> subtract(std::vector<bool> a, std::vector<bool> b) {
   return a;
 }
 
+bool checkvectorbool(std::vector<bool> a, std::vector<bool> b) {
+  for (int i = 0; i < a.size(); i++) {
+    if (a != b) {
+      return false;
+    }
+  }
+  return true;
+}
 
 
+void CFG::runWorklisthelper(int blocknumber, const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&
+        genkill) {
+          std::cout << "now you see me" << blocknumber << std::endl;
+          std::vector<bool> tempout = availableExpressions.at(blocknumber).second;
+          std::set<int> pre = basic_blocks.at(blocknumber).getPredecessors();
+          std::set<int>::iterator it;
+          for (it = pre.begin(); it != pre.end(); ++it) {
+              int f = *it; // Note the "*" here
+              availableExpressions.at(blocknumber).first = intersect(availableExpressions.at(blocknumber).first,availableExpressions.at(f).second);
+          }
+          auto temp = subtract(availableExpressions.at(blocknumber).first,genkill.at(blocknumber).second);
+          temp = unionop(temp,genkill.at(blocknumber).first);
+          availableExpressions.at(blocknumber).second = temp;
+          if (!checkvectorbool(tempout,availableExpressions.at(blocknumber).second)) {
+            pre = basic_blocks.at(blocknumber).getSuccessors();
+            for (it = pre.begin(); it != pre.end(); ++it) {
+              int f = *it; // Note the "*" here
+              runWorklisthelper(f,genkill);
+            }
+          }
+          std::cout << "I'm a happy man" << std::endl;
 
-
+}
 
 // writes to availableExpressions
 void CFG::runWorklist(
     const std::vector<std::pair<std::vector<bool>, std::vector<bool>>>&
         genkill) {
           int blocknumber = 0;
-          for (int i = 0; i < availableExpressions.size(); i++) {
-            std::set<int> pre = basic_blocks.at(i).getPredecessors();
-            std::set<int>::iterator it;
-            for (it = pre.begin(); it != pre.end(); ++it) {
-                int f = *it; // Note the "*" here
-                availableExpressions.at(i).first = intersect(availableExpressions.at(i).first,availableExpressions.at(f).second);
-            }
-            auto temp = subtract(availableExpressions.at(i).first,genkill.at(i).second);
-            temp = unionop(temp,genkill.at(i).first);
-            availableExpressions.at(i).second = temp;
-          }
+          runWorklisthelper(blocknumber, genkill);
+          
+          
   // fill me in
 }
 
